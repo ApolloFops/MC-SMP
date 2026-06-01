@@ -211,7 +211,7 @@ class Client(AsyncContextManager["Client"]):
 					await self._handle_item(response)
 		except Exception as e:
 			logger.exception(f"An error occurred in the receive loop.")
-			self.on_connection_closed.fire(e)
+			self.on_connection_closed.fire()
 			async with self._lock:
 				for future in self._requests.values():
 					if not future.done():
