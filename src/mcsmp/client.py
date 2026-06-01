@@ -184,6 +184,14 @@ class Client(AsyncContextManager["Client"]):
 		:type notification: Request
 		"""
 
+	@event
+	async def on_connection_closed(self) -> None:
+		"""
+		Event triggered when the connection to the server closes. This will often
+		happen if there is a server restart or something similar, and can be used to
+		automatically reconnect.
+		"""
+
 	async def _recv_loop(self) -> None:
 		if not self._ws: return
 
@@ -203,6 +211,7 @@ class Client(AsyncContextManager["Client"]):
 					await self._handle_item(response)
 		except Exception as e:
 			logger.exception(f"An error occurred in the receive loop.")
+			self.on_connection_closed.fire(e)
 			async with self._lock:
 				for future in self._requests.values():
 					if not future.done():
